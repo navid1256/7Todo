@@ -1,0 +1,32 @@
+{
+<<<<<<< HEAD
+    "name": "navid/7todo",
+    "description": "A simple Todolist (with ajax,php and mysql)",
+    "type": "project",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Navid",
+            "email": "navid.syndicate@gmail.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {
+        "hekmatinasser/verta": "^2.1"
+    }
+}
+=======
+    "name": "loghman/7todo",
+    "description": "A Simple Todo List Project (With Ajax,Php and mysql)",
+    "type": "project",
+    "license": "MIT",
+    "authors": [{
+        "name": "Loghman Avand",
+        "email": "avand.loghman@gmail.com"
+    }],
+    "minimum-stability": "stable",
+    "require": {
+        "hekmatinasser/verta": "^1.10"
+    }
+}
+>>>>>>> 0d95f51 (build-project-structure)

@@ -11,7 +11,10 @@
 <div class="page">
   <div class="pageHeader">
     <div class="title">Dashboard</div>
-    <div class="userPanel"><i class="fa fa-chevron-down"></i><span class="username">John Doe </span><img src="https://s3.amazonaws.com/uifaces/faces/twitter/kolage/73.jpg" width="40" height="40"/></div>
+    <div class="userPanel">
+    <a href="<?= site_url("?logout=1")?>"><i class="fa fa-sign-out"></i></a>
+    <span class="username"><?= $user->name ?? 'Unknown'; ?></span>
+    <img src="<?= $user->image; ?>" width="40" height="40"/></div>
   </div>
   <div class="main">
     <div class="nav">
@@ -23,11 +26,13 @@
       <div class="menu">
         <div class="title">Folders</div>
         <ul class="folder-list">
-          <li class="<?=isset($_GET['folder_id']) ? '' : 'active'?>"><i class="fa fa-folder"></i>All</li>
+          <li class="<?=isset($_GET['folder_id']) ? '' : 'active'?>">
+          <a href="<?= site_url() ?>"><i class="fa fa-folder"></i>All</a>
+          </li>
 
           <?php foreach ($folders as $folder): ?>
           <li class="<?=($_GET['folder_id'] == $folder->id) ? 'active' : ''?>">
-          <a href="?folder_id=<?=$folder->id?>"><i class="fa fa-folder"></i><?=$folder->name?></a>
+          <a href="<?= site_url("?folder_id=$folder->id") ?>"><i class="fa fa-folder"></i><?=$folder->name?></a>
           <a href="?delete_folder=<?=$folder->id?>" class="remove"  onclick="return confirm('Are You Sure to delete this Item?\n<?=$folder->name?>');">x</a>
           </li>
           <?php endforeach;?>
@@ -56,7 +61,7 @@
           <?php if (sizeof($tasks)): ?>
           <?php foreach ($tasks as $task): ?>
             <li class="<?=$task->is_done ? 'checked' : '';?>">
-              <i class="fa <?=$task->is_done ? 'fa-check-square-o' : 'fa-square-o';?> "></i>
+              <i data-taskId="<?=$task->id?>" class="isDone clickable fa <?=$task->is_done ? 'fa-check-square-o' : 'fa-square-o';?> "></i>
               <span><?=$task->title?></span>
               <div class="info">
                 <span class='created-at'>Created At <?=$task->created_at?></span>
@@ -80,6 +85,18 @@
   <script>
     $(document).ready(function(){
 
+      $('.isDone').click(function(e){
+          var tid = $(this).attr('data-taskId');
+          $.ajax({
+            url : "process/ajaxHandler.php",
+            method : "post",
+            data : {action: "doneSwitch",taskId : tid},
+            success : function(response){
+                location.reload();
+            }
+          });
+      });
+
       $('#addFolderBtn').click(function(e){
           var input = $('input#addFolderInput');
           $.ajax({
@@ -100,17 +117,17 @@
           e.stopPropagation();
           if(e.which == 13) {
               $.ajax({
-              url : "process/ajaxHandler.php",
-              method : "post",
-              data : {action: "addTask",folderId : <?= $_GET['folder_id']?> ,taskTitle: $('#taskNameInput').val()},
-              success : function(response){
-                if(response == '1'){
-                  location.reload();
-                }else{
-                  alert(response);
+                url : "process/ajaxHandler.php",
+                method : "post",
+                data : {action: "addTask",folderId : <?= $_GET['folder_id'] ?? 0 ?> ,taskTitle: $('#taskNameInput').val()},
+                success : function(response){
+                  if(response == '1'){
+                    location.reload();
+                  }else{
+                    alert(response);
+                  }
                 }
-              }
-            });
+              });
           }
       });
       $('#taskNameInput').focus();

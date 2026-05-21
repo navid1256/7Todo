@@ -37,6 +37,7 @@ function login($email,$pass){
     #check the password
     if(password_verify($pass,$user->password)){
         # login is successfull
+        session_regenerate_id(true);
         $user->image = "https://www.gravatar.com/avatar/" . md5( strtolower( trim( $user->email ) ) );
         $_SESSION['login'] = $user;
         return true;

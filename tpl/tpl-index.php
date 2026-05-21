@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <title><?=SITE_TITLE?></title>
+  <link rel="stylesheet" href="<?= site_url('assets/vendor/Font%20Awesome/css/fa-solid-subset.css') ?>">
+  <link rel="stylesheet" href="<?= site_url('assets/vendor/Font%20Awesome/css/fa-regular-subset.css') ?>">
   <link rel="stylesheet" href="<?=BASE_URL?>assets/css/style.css">
 
 </head>
@@ -12,14 +14,14 @@
   <div class="pageHeader">
     <div class="title">Dashboard</div>
     <div class="userPanel">
-    <a href="<?= site_url("?logout=1")?>"><i class="fa fa-sign-out"></i></a>
-    <span class="username"><?= $user->name ?? 'Unknown'; ?></span>
-    <img src="<?= $user->image; ?>" width="40" height="40"/></div>
+    <a href="<?= site_url("?logout=1")?>" class="logout-link"><i class="fas fa-sign-out-alt"></i></a>
+    <span class="username"><?= esc($user->name ?? 'Unknown'); ?></span>
+    <img src="<?= esc($user->image ?? ''); ?>" width="40" height="40"/></div>
   </div>
   <div class="main">
     <div class="nav">
       <div class="searchbox">
-        <div><i class="fa fa-search"></i>
+        <div><i class="fas fa-search"></i>
           <input type="search" placeholder="Search"/>
         </div>
       </div>
@@ -27,13 +29,18 @@
         <div class="title">Folders</div>
         <ul class="folder-list">
           <li class="<?=isset($_GET['folder_id']) ? '' : 'active'?>">
-          <a href="<?= site_url() ?>"><i class="fa fa-folder"></i>All</a>
+          <a href="<?= site_url() ?>"><i class="fas fa-folder"></i>All</a>
           </li>
 
           <?php foreach ($folders as $folder): ?>
-          <li class="<?=($_GET['folder_id'] == $folder->id) ? 'active' : ''?>">
-          <a href="<?= site_url("?folder_id=$folder->id") ?>"><i class="fa fa-folder"></i><?=$folder->name?></a>
-          <a href="?delete_folder=<?=$folder->id?>" class="remove"  onclick="return confirm('Are You Sure to delete this Item?\n<?=$folder->name?>');">x</a>
+          <li class="folder-item <?=(isset($_GET['folder_id']) && $_GET['folder_id'] == $folder->id) ? 'active' : ''?>">
+          <a href="<?= site_url("?folder_id=$folder->id") ?>"><i class="fas fa-folder"></i><?=esc($folder->name)?></a>
+          <form action="<?= site_url() ?>" method="post" class="remove-form">
+            <input type="hidden" name="action" value="delete_folder">
+            <input type="hidden" name="folder_id" value="<?= (int)$folder->id ?>">
+            <input type="hidden" name="csrf_token" value="<?= esc(getCsrfToken()) ?>">
+            <button type="submit" class="remove" onclick="return confirm('Are You Sure to delete this Item?\n<?=esc($folder->name)?>');"><i class="fas fa-trash-alt"></i></button>
+          </form>
           </li>
           <?php endforeach;?>
 
@@ -61,11 +68,16 @@
           <?php if (sizeof($tasks)): ?>
           <?php foreach ($tasks as $task): ?>
             <li class="<?=$task->is_done ? 'checked' : '';?>">
-              <i data-taskId="<?=$task->id?>" class="isDone clickable fa <?=$task->is_done ? 'fa-check-square-o' : 'fa-square-o';?> "></i>
-              <span><?=$task->title?></span>
+              <i data-taskId="<?=$task->id?>" class="isDone clickable <?=$task->is_done ? 'fas fa-check-square' : 'far fa-square';?> "></i>
+              <span><?=esc($task->title)?></span>
               <div class="info">
-                <span class='created-at'>Created At <?=$task->created_at?></span>
-                <a href="?delete_task=<?=$task->id?>" class="remove" onclick="return confirm('Are You Sure to delete this Item?\n<?=$task->title?>');">x</a>
+                <span class='created-at'>Created At <?=esc($task->created_at)?></span>
+                <form action="<?= site_url() ?>" method="post" class="remove-form">
+                  <input type="hidden" name="action" value="delete_task">
+                  <input type="hidden" name="task_id" value="<?= (int)$task->id ?>">
+                  <input type="hidden" name="csrf_token" value="<?= esc(getCsrfToken()) ?>">
+                  <button type="submit" class="remove" onclick="return confirm('Are You Sure to delete this Item?\n<?=esc($task->title)?>');"><i class="fas fa-trash-alt"></i></button>
+                </form>
               </div>
             </li>
             <?php endforeach;?>
@@ -84,30 +96,73 @@
   <script  src="assets/js/script.js"></script>
   <script>
     $(document).ready(function(){
+      function escapeHtml(text) {
+        return $('<div>').text(text).html();
+      }
 
-      $('.isDone').click(function(e){
-          var tid = $(this).attr('data-taskId');
+      function bindDoneSwitch($scope) {
+        $scope.find('.isDone').off('click').on('click', function(){
+          var $icon = $(this);
+          var tid = $icon.attr('data-taskId');
           $.ajax({
             url : "process/ajaxHandler.php",
             method : "post",
-            data : {action: "doneSwitch",taskId : tid},
+            dataType: "json",
+            data : {action: "doneSwitch",taskId : tid, csrf_token: "<?= esc(getCsrfToken()) ?>"},
             success : function(response){
-                location.reload();
+              if(!response || !response.ok){
+                alert(response && response.message ? response.message : 'Error');
+                return;
+              }
+              if(response.data && parseInt(response.data.isDone, 10) === 1){
+                $icon.removeClass('far fa-square').addClass('fas fa-check-square');
+                $icon.closest('li').addClass('checked');
+              }else{
+                $icon.removeClass('fas fa-check-square').addClass('far fa-square');
+                $icon.closest('li').removeClass('checked');
+              }
             }
           });
-      });
+        });
+      }
+
+      function buildTaskItem(task){
+        var iconClass = parseInt(task.isDone, 10) === 1 ? 'fas fa-check-square' : 'far fa-square';
+        return '' +
+          '<li>' +
+            '<i data-taskId="' + task.id + '" class="isDone clickable ' + iconClass + '"></i>' +
+            '<span>' + escapeHtml(task.title) + '</span>' +
+            '<div class="info">' +
+              '<span class="created-at">Created At ' + escapeHtml(task.createdAt) + '</span>' +
+              '<form action="<?= site_url() ?>" method="post" class="remove-form">' +
+                '<input type="hidden" name="action" value="delete_task">' +
+                '<input type="hidden" name="task_id" value="' + task.id + '">' +
+                '<input type="hidden" name="csrf_token" value="<?= esc(getCsrfToken()) ?>">' +
+                '<button type="submit" class="remove" onclick="return confirm(\'Are You Sure to delete this Item?\\n' + escapeHtml(task.title).replace(/'/g, "\\'") + '\');"><i class="fas fa-trash-alt"></i></button>' +
+              '</form>' +
+            '</div>' +
+          '</li>';
+      }
+
+      bindDoneSwitch($(document));
 
       $('#addFolderBtn').click(function(e){
           var input = $('input#addFolderInput');
+          var val = $.trim(input.val());
+          if(val.length < 3){
+            alert('نام فولدر باید بزرگتر از 2 حرف باشد.');
+            return;
+          }
           $.ajax({
             url : "process/ajaxHandler.php",
             method : "post",
-            data : {action: "addFolder",folderName: input.val()},
+            dataType: "json",
+            data : {action: "addFolder",folderName: val, csrf_token: "<?= esc(getCsrfToken()) ?>"},
             success : function(response){
-              if(response == '1'){
-                $('<li> <a href="#"><i class="fa fa-folder"></i>'+input.val()+'</a></li>').appendTo('ul.folder-list');
+              if(response && response.ok){
+                location.reload();
               }else{
-                alert(response);
+                alert(response && response.message ? response.message : 'Error');
               }
             }
           });
@@ -116,15 +171,29 @@
       $('#taskNameInput').on('keypress',function(e) {
           e.stopPropagation();
           if(e.which == 13) {
+              var $input = $('#taskNameInput');
+              var title = $.trim($input.val());
+              if(title.length < 3){
+                alert('عنوان تسک باید بزرگتر از 2 حرف باشد.');
+                return;
+              }
               $.ajax({
                 url : "process/ajaxHandler.php",
                 method : "post",
-                data : {action: "addTask",folderId : <?= $_GET['folder_id'] ?? 0 ?> ,taskTitle: $('#taskNameInput').val()},
+                dataType: "json",
+                data : {action: "addTask",folderId : <?= (int)($_GET['folder_id'] ?? 0) ?> ,taskTitle: title, csrf_token: "<?= esc(getCsrfToken()) ?>"},
                 success : function(response){
-                  if(response == '1'){
-                    location.reload();
+                  if(response && response.ok){
+                    var $list = $('.main .view .content .list ul');
+                    $list.find('li').filter(function(){
+                      return $(this).text().trim() === 'No Task Here ..';
+                    }).remove();
+                    var html = buildTaskItem(response.data);
+                    $list.prepend(html);
+                    bindDoneSwitch($list);
+                    $input.val('');
                   }else{
-                    alert(response);
+                    alert(response && response.message ? response.message : 'Error');
                   }
                 }
               });

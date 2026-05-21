@@ -8,9 +8,10 @@
 /*** Folder Function ***/
 function deleteFolder($folder_id){
     global $pdo;
-    $sql = "delete from folders where id = $folder_id";
+    $current_user_id = getCurrentUserId();
+    $sql = "delete from folders where id = :folder_id and user_id = :user_id";
     $stmt = $pdo->prepare($sql);
-    $stmt->execute();
+    $stmt->execute([':folder_id' => (int)$folder_id, ':user_id' => (int)$current_user_id]);
     return $stmt->rowCount();
 }
 
@@ -34,9 +35,9 @@ function doneSwith($task_id){
 function getFolders(){
     global $pdo;
     $current_user_id = getCurrentUserId();
-    $sql = "select * from folders where user_id = $current_user_id";
+    $sql = "select * from folders where user_id = :user_id";
     $stmt = $pdo->prepare($sql);
-    $stmt->execute();
+    $stmt->execute([':user_id' => (int)$current_user_id]);
     $records = $stmt->fetchAll(PDO::FETCH_OBJ);
     return $records;
 }
@@ -44,33 +45,48 @@ function getFolders(){
 /*** Tasks Function ***/
 function deleteTask(int $task_id){
     global $pdo;
-    $sql = "delete from tasks where id = :taskID";
+    $current_user_id = getCurrentUserId();
+    $sql = "delete from tasks where id = :taskID and user_id = :user_id";
     $stmt = $pdo->prepare($sql);
-    $stmt->execute([':taskID'=>$task_id]);
+    $stmt->execute([':taskID'=>$task_id, ':user_id' => (int)$current_user_id]);
     return $stmt->rowCount();
 }
 
 function addTask($taskTitle,$folderId){
     global $pdo;
     $current_user_id = getCurrentUserId();
+    $folderCheck = $pdo->prepare("select id from folders where id = :folder_id and user_id = :user_id limit 1");
+    $folderCheck->execute([':folder_id' => (int)$folderId, ':user_id' => (int)$current_user_id]);
+    if(!$folderCheck->fetch(PDO::FETCH_OBJ)){
+        return 0;
+    }
     $sql = "INSERT INTO `tasks` (title,user_id,folder_id) VALUES (:title,:user_id,:folder_id);";
     $stmt = $pdo->prepare($sql);
-    $stmt->execute([':title'=>$taskTitle,':user_id'=>$current_user_id,':folder_id'=>$folderId]);
+    $stmt->execute([':title'=>$taskTitle,':user_id'=>$current_user_id,':folder_id'=>(int)$folderId]);
     return $stmt->rowCount();
+}
+
+function getTaskById(int $task_id){
+    global $pdo;
+    $current_user_id = getCurrentUserId();
+    $sql = "select * from tasks where id = :task_id and user_id = :user_id limit 1";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([':task_id' => $task_id, ':user_id' => (int)$current_user_id]);
+    return $stmt->fetch(PDO::FETCH_OBJ);
 }
 
 function getTasks(){
     global $pdo;
     $folder = $_GET['folder_id'] ?? null;
-    $folderCondition = '';
-    if(isset($folder) and is_numeric($folder)){
-        $folderCondition = " and folder_id=$folder";
-    }
-
     $current_user_id = getCurrentUserId();
-    $sql = "select * from tasks where user_id = $current_user_id $folderCondition";
+    $sql = "select * from tasks where user_id = :user_id";
+    $params = [':user_id' => (int)$current_user_id];
+    if(isset($folder) and is_numeric($folder)){
+        $sql .= " and folder_id = :folder_id";
+        $params[':folder_id'] = (int)$folder;
+    }
     $stmt = $pdo->prepare($sql);
-    $stmt->execute();
+    $stmt->execute($params);
     $records = $stmt->fetchAll(PDO::FETCH_OBJ);
     return $records;
 }

@@ -31,6 +31,24 @@ function message($msg,$cssClass = 'info'){
     echo "<div class='$cssClass' style='padding: 20px; width: 80%; margin: 10px auto; background: #f9dede; border: 1px solid #cca4a4; color: #521717; border-radius: 5px; font-family: sans-serif;'>$msg</div>";
 }
 
+function esc($value){
+    return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
+}
+
+function getCsrfToken(){
+    if(empty($_SESSION['csrf_token'])){
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    }
+    return $_SESSION['csrf_token'];
+}
+
+function verifyCsrfToken($token){
+    if(empty($_SESSION['csrf_token']) || empty($token)){
+        return false;
+    }
+    return hash_equals($_SESSION['csrf_token'], $token);
+}
+
 
 
 function dd($var){

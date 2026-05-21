@@ -1,7 +1,11 @@
 /* @import url(https://fonts.googleapis.com/css?family=Dosis:300|Lato:300,400,600,700|Roboto+Condensed:300,700|Open+Sans+Condensed:300,600|Open+Sans:400,300,600,700|Maven+Pro:400,700); */
-@import url("https://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css");
+
 html {
-    background-image: url(http://www.ultraimg.com/images/2UeGfhZ.jpg);
+    background:
+        radial-gradient(circle at 15% 20%, rgba(126, 207, 224, 0.30) 0%, rgba(126, 207, 224, 0) 35%),
+        radial-gradient(circle at 85% 80%, rgba(84, 185, 205, 0.26) 0%, rgba(84, 185, 205, 0) 38%),
+        linear-gradient(145deg, #edf8fc 0%, #dceff7 45%, #c8e5f1 100%);
+    background-attachment: fixed;
 }
 
 body {
@@ -31,6 +35,14 @@ a.remove {
     padding-right: 5px;
 }
 
+button.remove {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    color: #e3342f;
+}
+
 a.remove:hover {
     font-weight: 700;
 }
@@ -42,7 +54,7 @@ a.remove:hover {
 
 span.created-at {
     font-size: 11px;
-    margin-right: 12px;
+    margin-right: 10px;
 }
 
 .page {
@@ -90,6 +102,34 @@ span.created-at {
     float: right;
     line-height: 40px;
     padding-right: 10px;
+}
+
+.pageHeader .userPanel .logout-link {
+    float: right;
+    width: 32px;
+    height: 32px;
+    line-height: 32px;
+    margin-top: 4px;
+    margin-right: 6px;
+    text-align: center;
+    border-radius: 50%;
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.24);
+    transition: all 0.2s ease;
+    font-size: 1.2em;
+}
+
+.pageHeader .userPanel .logout-link i {
+    float: none;
+    line-height: 32px;
+    padding-right: 0;
+}
+
+.pageHeader .userPanel .logout-link:hover {
+    color: #fff;
+    background: #070000ce;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(47, 143, 163, 0.35);
 }
 
 .pageHeader .userPanel .username {
@@ -187,12 +227,25 @@ span.created-at {
     margin: 5px 0px;
     padding: 5px 0px;
     font-weight: 600;
-    margin-right: 30px;
+    margin-right: 25px;
+    margin-left: -3px;
     padding-left: 10px;
     -moz-border-radius: 4px;
     -webkit-border-radius: 4px;
     border-radius: 4px;
     transition: 0.25s all;
+}
+
+.main .nav .menu ul li.folder-item {
+    position: relative;
+    padding-right: 28px;
+}
+
+.main .nav .menu ul li .remove-form {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
 }
 
 .main .nav .menu ul li.active {
@@ -295,6 +348,8 @@ span.created-at {
     line-height: 50px;
     list-style: none;
     border-top: 1px solid #AAA;
+    display: flex;
+    align-items: center;
 }
 
 .main .view .content .list ul li.checked {
@@ -306,25 +361,39 @@ span.created-at {
 }
 
 .main .view .content .list ul li i {
-    float: left;
-    width: 30px;
+    width: 20px;
     height: 50px;
     line-height: 50px;
-    margin-left: 10px;
     font-size: 1.3em;
+    flex: 0 0 30px;
 }
 
 .main .view .content .list ul li span {
-    float: left;
     font-weight: 600;
+    flex: 1 1 auto;
+    min-width: 0;
 }
 
 .main .view .content .list ul li .info {
-    float: right;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex: 0 0 230px;
+    padding-right: 10px;
+}
+
+.main .view .content .list ul li .info .remove-form {
+    display: inline-block;
+    width: 16px;
+    text-align: center;
+    margin-left: 8px;
 }
 
 .main .view .content .list ul li .info span {
     font-weight: 300;
+    display: inline-block;
+    width: 190px;
+    text-align: right;
 }
 
 .main .view .content .list ul li .info .button {

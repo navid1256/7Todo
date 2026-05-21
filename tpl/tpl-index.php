@@ -9,6 +9,10 @@
 
 </head>
 <body>
+<?php
+$folders = $folders ?? [];
+$tasks = $tasks ?? [];
+?>
 <!-- partial:index.partial.html -->
 <div class="page">
   <div class="pageHeader">

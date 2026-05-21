@@ -1,4 +1,16 @@
-@import url("https://fonts.googleapis.com/css?family=Karla:400,700");
+@font-face {
+    font-family: 'Karla';
+    src: url('../font/Karla/Karla-Regular.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Karla';
+    src: url('../font/Karla/Karla-Bold.ttf') format('truetype');
+    font-weight: 700;
+    font-style: normal;
+}
 
 body {
     margin: 0;
@@ -228,8 +240,8 @@ button:focus {
     height: 100%;
     left: 0;
     top: 0;
-    background: url("https://images.unsplash.com/photo-1512805147242-c3e79caf64bf?ixlib=rb-1.2.1&q=85&fm=jpg&crop=entropy&cs=srgb&ixid=eyJhcHBfaWQiOjE0NTg5fQ");
-    background-size: auto 100%;
+    background: url("../img/gpt-image.png") no-repeat center center;
+    background-size: cover;
     background-position: center center;
     background-repeat: no-repeat;
 }
@@ -247,4 +259,19 @@ button:focus {
 
 #image-overlay.two {
     background-color: #AE94DE;
+}
+
+@media (max-width: 1000px) {
+    #panel-box {
+        width: 90%;
+        min-width: 300px;
+    }
+
+    .panel:nth-child(1) {
+        width: 50%;
+    }
+
+    .panel:nth-child(2) {
+        width: 50%;
+    }
 }

@@ -42,11 +42,11 @@ function getFolders(){
 }
 
 /*** Tasks Function ***/
-function deleteTask($task_id){
+function deleteTask(int $task_id){
     global $pdo;
-    $sql = "delete from tasks where id = $task_id";
+    $sql = "delete from tasks where id = :taskID";
     $stmt = $pdo->prepare($sql);
-    $stmt->execute();
+    $stmt->execute([':taskID'=>$task_id]);
     return $stmt->rowCount();
 }
 

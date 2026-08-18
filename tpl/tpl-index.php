@@ -19,7 +19,7 @@ $tasks = $tasks ?? [];
     <div class="title">Dashboard</div>
     <div class="userPanel">
     <a href="<?= site_url("?logout=1")?>" class="logout-link"><i class="fas fa-sign-out-alt"></i></a>
-    <span class="username"><?= esc($user->name ?? 'Unknown'); ?></span>
+    <span class="username"><?= esc($user->username ?? 'Unknown'); ?></span>
     <img src="<?= esc($user->image ?? ''); ?>" width="40" height="40"/></div>
   </div>
   <div class="main">

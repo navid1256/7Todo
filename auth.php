@@ -3,7 +3,7 @@ include "bootstrap/init.php";
 
 $home_url = site_url();
 if($_SERVER['REQUEST_METHOD'] == 'POST'){
-    $action = $_GET['action'];
+    $action = $_GET['action'] ?? '';
     $params = $_POST;
     if($action == 'register'){
         $result = register($params);

@@ -49,7 +49,7 @@ function register($userData){
     global $pdo;
     # validation of $userData here (isValidEmail,isValidUserName,isValidPassowrd)
     $passHash = password_hash($userData['password'],PASSWORD_BCRYPT);
-    $sql = "INSERT INTO `users` (name,email,password) VALUES (:name,:email,:pass);";
+    $sql = "INSERT INTO `users` (username,email,password) VALUES (:username,:email,:pass);";
     $stmt = $pdo->prepare($sql);
     $stmt->execute([':name'=>$userData['name'],':email'=>$userData['email'],':pass'=>$passHash]);
     return $stmt->rowCount() ? true : false;

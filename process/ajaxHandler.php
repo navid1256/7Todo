@@ -1,25 +1,26 @@
 <?php
 include_once "../bootstrap/init.php";
 
-if(!isAjaxRequest()){
+if (!isAjaxRequest()) {
     diePage("Invalid Request!");
 }
 
-if(!isset($_POST['action']) || empty($_POST['action'])){
+if (!isset($_POST['action']) || empty($_POST['action'])) {
     diePage("Invalid Action!");
 }
 
-if(!isLoggedIn()){
+if (!isLoggedIn()) {
     diePage("Unauthorized!");
 }
 
-if(!verifyCsrfToken($_POST['csrf_token'] ?? '')){
+if (!verifyCsrfToken($_POST['csrf_token'] ?? '')) {
     diePage("Invalid CSRF token!");
 }
 
 header('Content-Type: application/json; charset=utf-8');
 
-function jsonResponse($ok, $message = '', $data = []){
+function jsonResponse($ok, $message = '', $data = [])
+{
     echo json_encode([
         'ok' => (bool)$ok,
         'message' => (string)$message,
@@ -28,14 +29,14 @@ function jsonResponse($ok, $message = '', $data = []){
     die();
 }
 
-switch($_POST['action']){
+switch ($_POST['action']) {
     case "doneSwitch":
-        $task_id = $_POST['taskId'];
-        if(!isset($task_id) || !is_numeric($task_id)){
+        $task_id = $_POST['taskId'] ?? null;
+        if (!isset($task_id) || !is_numeric($task_id)) {
             jsonResponse(false, "آیدی تسک معتبر نیست");
         }
         $updated = doneSwith((int)$task_id);
-        if(!$updated){
+        if (!$updated) {
             jsonResponse(false, "تسک پیدا نشد.");
         }
         $task = getTaskById((int)$task_id);
@@ -43,28 +44,29 @@ switch($_POST['action']){
             'taskId' => (int)$task_id,
             'isDone' => isset($task->is_done) ? (int)$task->is_done : 0
         ]);
-    break;
+        break;
     case "addFolder":
-        if(!isset($_POST['folderName']) || strlen($_POST['folderName']) < 3){
+        $folderName = trim($_POST['folderName'] ?? '');
+        if (!isset($folderName) || mb_strlen($folderName) < 3) {
             jsonResponse(false, "نام فولدر باید بزرگتر از 2 حرف باشد.");
         }
         $added = addFolder($_POST['folderName']);
-        if(!$added){
+        if (!$added) {
             jsonResponse(false, "خطا در ایجاد فولدر.");
         }
         jsonResponse(true, "ok");
-    break;
+        break;
     case "addTask":
-        $folderId = $_POST['folderId'];
-        $taskTitle = $_POST['taskTitle'];
-        if(!isset($folderId) || empty($folderId)){
+        $folderId = $_POST['folderId'] ?? null;
+        $taskTitle = trim($_POST['taskTitle'] ?? '');
+        if (!isset($folderId) || empty($folderId)) {
             jsonResponse(false, "فولدر را انتخاب کنید.");
         }
-        if(!isset($taskTitle) || strlen($taskTitle) < 3){
+        if (!isset($taskTitle) || strlen($taskTitle) < 3) {
             jsonResponse(false, "عنوان تسک باید بزرگتر از 2 حرف باشد.");
         }
-        $added = addTask($taskTitle,$folderId);
-        if(!$added){
+        $added = addTask($taskTitle, $folderId);
+        if (!$added) {
             jsonResponse(false, "افزودن تسک انجام نشد.");
         }
         $taskId = (int)$pdo->lastInsertId();
@@ -75,7 +77,7 @@ switch($_POST['action']){
             'createdAt' => esc($task->created_at ?? date('Y-m-d H:i:s')),
             'isDone' => isset($task->is_done) ? (int)$task->is_done : 0
         ]);
-    break;
+        break;
 
     default:
         diePage("Invalid Action!");
